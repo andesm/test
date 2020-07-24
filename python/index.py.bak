@@ -1,0 +1,35 @@
+#!/usr/bin/python3
+import cgitb
+import pymongo
+import json
+import sys
+import io, os
+
+#cgitb.enable()
+
+sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8')
+sys.stdin = io.TextIOWrapper(sys.stdin.buffer, encoding='utf-8')
+print("Content-Type: application/json; charset=utf-8")
+print()
+
+client = pymongo.MongoClient('localhost', 27017)
+db = client.rmp
+co = db.rmp
+
+if os.environ['REQUEST_METHOD'] == 'POST':
+    song_list = json.loads(sys.stdin.read(), 'utf-8')
+    with open("/tmp/rmp.log", 'a', encoding = 'utf-8') as file:
+        for song in song_list:
+            co.update_one({"file": song}, {"$set": song_list[song]}, upsert = True)
+            print(song_list ,file = file)
+else:
+    list = {}
+
+    for data in co.find():
+        del data['_id']
+        file = data['file']
+        del data['file']
+        list[file] = data
+
+    print(json.dumps(list ,ensure_ascii = False, indent = 2))
+    

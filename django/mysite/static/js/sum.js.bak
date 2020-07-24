@@ -1,0 +1,11 @@
+$(function($){
+  django.jQuery('fieldset').keyup(function(){
+    var numA = $('#id_quantity').val();
+    var numB = $('#id_unit_price').val();
+    // 整数に置き換えて変数に渡す
+    numA = parseInt(numA);
+    numB = parseInt(numB);
+    // 乗算された数を渡す
+    $('#id_amount_money').val(numA*numB);
+   });
+});

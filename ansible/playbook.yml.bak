@@ -1,0 +1,517 @@
+---
+- hosts: openstack
+  become: yes
+  vars:
+    openstack_password: openstack
+    replaces:
+      - file: /etc/mysql/mariadb.conf.d/50-server.cnf
+        regexp: "character-set-server  = utf8mb4"
+        replace: "character-set-server  = utf8"
+        notify: mysql restart
+      - file: /etc/mysql/mariadb.conf.d/50-server.cnf
+        regexp: "^collation-server      = utf8mb4_general_ci"
+        replace: "collation-server      = utf8_general_ci"
+        notify: mysql restart
+      - file: /etc/mysql/mariadb.conf.d/50-client.cnf
+        regexp: "default-character-set = utf8mb4"
+        replace: "default-character-set = utf8"
+        notify: mysql restart
+      - file: /etc/mysql/mariadb.conf.d/50-mysql-clients.cnf
+        regexp: "default-character-set = utf8mb4"
+        replace: "default-character-set = utf8"
+        notify: mysql restart
+      - file: /etc/keystone/keystone.conf
+        regexp: "^connection = sqlite:////var/lib/keystone/keystone.db"
+        replace: "#connection = sqlite:////var/lib/keystone/keystone.db"
+        notify: apache2 restart
+      - file: /etc/neutron/neutron.conf
+        regexp: "^sqlite:////var/lib/neutron/neutron.sqlite"
+        replace: "#sqlite:////var/lib/neutron/neutron.sqlite"
+        notify: 
+    openstack_commands:        
+      - service create --name keystone --description "OpenStack Identity" identity
+      - service create --name glance --description "OpenStack Image" image        
+      - service create --name nova --description "OpenStack Compute" compute
+      - service create --name neutron --description "OpenStack Networking" network
+      - domain create --description "Default Domain" default
+      - project create --domain default --description "Admin Project" admin
+      - project create --domain default --description "Service Project" service
+      - user create --domain default --password {{ openstack_password }} admin
+      - user create --domain default --password {{ openstack_password }} glance
+      - user create --domain default --password {{ openstack_password }} nova
+      - user create --domain default --password {{ openstack_password }} neutron
+      - role create admin
+      - role add --project admin --user admin admin
+      - role add --project service --user glance admin
+      - role add --project service --user nova admin
+      - role add --project service --user neutron admin
+      - endpoint create --region RegionOne identity public http://controller:5000/v3
+      - endpoint create --region RegionOne identity internal http://controller:5000/v3
+      - endpoint create --region RegionOne identity admin http://controller:35357/v3
+      - endpoint create --region RegionOne image public http://controller:9292
+      - endpoint create --region RegionOne image internal http://controller:9292
+      - endpoint create --region RegionOne image admin http://controller:9292
+      - endpoint create --region RegionOne compute public http://controller:8774/v2.1/%\(tenant_id\)s
+      - endpoint create --region RegionOne compute internal http://controller:8774/v2.1/%\(tenant_id\)s
+      - endpoint create --region RegionOne compute admin http://controller:8774/v2.1/%\(tenant_id\)s
+      - openstack endpoint create --region RegionOne network public http://controller:9696
+      - openstack endpoint create --region RegionOne network internal http://controller:9696
+      - openstack endpoint create --region RegionOne network admin http://controller:9696  
+    blockinfiles:
+      - dest: /etc/mysql/mariadb.conf.d/50-server.cnf
+        config:
+          - insertafter: ^\[mysqld\]$
+            block: |
+              default-storage-engine = innodb
+              innodb_file_per_table
+              max_connections = 4096
+        notify: mysql restart
+
+      - dest: /etc/keystone/keystone.conf
+        config:
+          - insertafter: ^\[DEFAULT\]$
+            block: |
+              admin_token = {{ admin_token.stdout }}
+          - insertafter: ^\[database\]$
+            block: |
+              connection = mysql+pymysql://keystone:{{ openstack_password }}@controller/keystone
+          - insertafter: ^\[token\]$
+            block: |
+              provider = fernet
+        notify: apache2 restart
+        
+      - dest: /etc/glance/glance-api.conf
+        config:
+          - insertafter: ^\[database\]$
+            block: |
+              connection = mysql+pymysql://glance:{{ openstack_password }}@controller/glance
+          - insertafter: ^\[keystone_authtoken\]$
+            block: |
+              auth_uri = http://controller:5000
+              auth_url = http://controller:35357
+              memcached_servers = controller:11211
+              auth_type = password
+              project_domain_name = default
+              user_domain_name = default
+              project_name = service
+              username = glance
+              password = {{ openstack_password }}
+              
+          - insertafter: ^\[paste_deploy\]$
+            block: |
+              flavor = keystone
+              
+          - insertafter: ^\[glance_store\]$
+            block: |
+              stores = file,http
+              default_store = file
+              filesystem_store_datadir = /var/lib/glance/images/
+              
+        notify: glance-api restart
+        
+      - dest: /etc/glance/glance-registry.conf
+        config:
+          - insertafter: ^\[database\]$
+            block: |
+              connection = mysql+pymysql://glance:{{ openstack_password }}@controller/glance
+              
+          - insertafter: ^\[keystone_authtoken\]$
+            block: |
+              auth_uri = http://controller:5000
+              auth_url = http://controller:35357
+              memcached_servers = controller:11211
+              auth_type = password
+              project_domain_name = default
+              user_domain_name = default
+              project_name = service
+              username = glance
+              password = {{ openstack_password }}
+              
+          - insertafter: ^\[paste_deploy\]$
+            block: |
+              flavor = keystone
+              
+        notify: glance-registry restart
+        
+      - dest: /etc/nova/nova.conf
+        config:
+        - insertafter: ^\[DEFAULT\]$
+          block: |
+            enabled_apis = osapi_compute,metadata
+            rpc_backend = rabbit
+            auth_strategy = keystone
+            my_ip = 192.168.1.164
+            use_neutron = True
+            firewall_driver = nova.virt.firewall.NoopFirewallDriver
+            
+        - insertafter: EOF
+          block: |
+            [api_database]
+            connection = mysql+pymysql://nova:{{ openstack_password }}@controller/nova_api
+            
+            [database]
+            connection = mysql+pymysql://nova:{{ openstack_password }}@controller/nova
+            
+            [oslo_messaging_rabbit]
+            rabbit_host = controller
+            rabbit_userid = openstack
+            rabbit_password = {{ openstack_password }}
+
+            [keystone_authtoken]
+            auth_uri = http://controller:5000
+            auth_url = http://controller:35357
+            memcached_servers = controller:11211
+            auth_type = password
+            project_domain_name = default
+            user_domain_name = default
+            project_name = service
+            username = nova
+            password = {{ openstack_password }}
+
+            [vnc]
+            enabled = True
+            vncserver_listen = 0.0.0.0
+            vncserver_proxyclient_address = $my_ip
+            novncproxy_base_url = http://controller:6080/vnc_auto.html
+          
+            [glance]
+            api_servers = http://controller:9292
+
+            [oslo_concurrency]
+            lock_path = /var/lib/nova/tmp
+
+            [neutron]
+            url = http://controller:9696
+            auth_url = http://controller:35357
+            auth_type = password
+            project_domain_name = default
+            user_domain_name = default
+            region_name = RegionOne
+            project_name = service
+            username = neutron
+            password = {{ openstack_password }}
+
+            service_metadata_proxy = True
+            metadata_proxy_shared_secret = {{ openstack_password }}
+        notify:
+          - nova-api restart
+          - nova-consoleauth restart
+          - nova-scheduler restart
+          - nova-conductor restart
+          - nova-novncproxy restart
+          - nova-compute restart
+
+      - dest: /etc/neutron/neutron.conf
+        config:
+          - insertafter: [database]
+            block: |
+              connection = mysql+pymysql://neutron:{{ openstack_password }}@controller/neutron
+              
+          - insertafter: [DEFAULT]
+            block: |
+              service_plugins = router
+              allow_overlapping_ips = True
+              rpc_backend = rabbit
+              auth_strategy = keystone
+              notify_nova_on_port_status_changes = True
+              notify_nova_on_port_data_changes = True
+
+          - insertafter: [oslo_messaging_rabbit]
+            block: |
+              rabbit_host = controller
+              rabbit_userid = openstack
+              rabbit_password = {{ openstack_password }}
+
+          - insertafter: [keystone_authtoken]
+            block: |
+              auth_uri = http://controller:5000
+              auth_url = http://controller:35357
+              memcached_servers = controller:11211
+              auth_type = password
+              project_domain_name = default
+              user_domain_name = default
+              project_name = service
+              username = neutron
+              password = {{ openstack_password }}
+
+          - insertafter: [nova]
+            block: |
+              auth_url = http://controller:35357
+              auth_type = password
+              project_domain_name = default
+              user_domain_name = default
+              region_name = RegionOne
+              project_name = service
+              username = nova
+              password = {{ openstack_password }}
+
+        notify: 
+          - nova-api restart
+          - neutron-server restart
+          - neutron-linuxbridge-agent restart
+          - neutron-dhcp-agent restart
+          - neutron-metadata-agent restart
+          - neutron-l3-agent restart
+          
+      - dest: /etc/neutron/plugins/ml2/ml2_conf.ini
+        config:
+          - insertafter: [ml2]
+            block: |
+              type_drivers = flat,vlan,vxlan
+              tenant_network_types = vxlan
+              mechanism_drivers = linuxbridge,l2population
+              extension_drivers = port_security
+
+          - insertafter: [ml2_type_flat]
+            block: |
+              flat_networks = provider
+
+          - insertafter: [ml2_type_vxlan]
+            block: |
+              vni_ranges = 1:1000
+
+          - insertafter: [securitygroup]
+            block: |
+              enable_ipset = True
+
+        notify: 
+
+      - dest:/etc/neutron/plugins/ml2/linuxbridge_agent.ini
+        config:
+          - insertafter: [linux_bridge]
+            block: |
+              physical_interface_mappings = provider:ens38
+
+          - insertafter: [vxlan]
+            block: |
+              enable_vxlan = True
+              local_ip = 192.168.1.164
+              l2_population = True
+
+          - insertafter: [securitygroup]
+            block: |
+              enable_security_group = True
+              firewall_driver = neutron.agent.linux.iptables_firewall.IptablesFirewallDriver
+
+        notify: 
+            
+      - dest: /etc/neutron/l3_agent.ini
+        config:
+          - insertafter: [DEFAULT]
+            block: |
+              interface_driver = neutron.agent.linux.interface.BridgeInterfaceDriver
+              external_network_bridge =
+
+      - dest: /etc/neutron/dhcp_agent.ini
+        config:
+          - insertafter: [DEFAULT]
+            block: |
+              interface_driver = neutron.agent.linux.interface.BridgeInterfaceDriver
+              dhcp_driver = neutron.agent.linux.dhcp.Dnsmasq
+              enable_isolated_metadata = True
+
+        notify: 
+
+      - dest: /etc/neutron/metadata_agent.ini
+        config:
+          - insertafter: [DEFAULT]
+            block: |
+              nova_metadata_ip = controller
+              metadata_proxy_shared_secret = {{ openstack_password }}
+
+          
+    db_syncs:
+      - command: keystone-manage db_sync
+        become_user: keystone 
+      - command: glance-manage db_sync
+        become_user: glance
+      - command: nova-manage api_db sync
+        become_user: nova
+      - command: nova-manage db sync
+        become_user: nova
+  tasks:
+    - name: Set the fact for the other scripts to use
+      set_fact: ansible_tmp_dir='{{ ansible_user_dir }}/ansible_tmp'
+
+    - name: Make the ansible_tmp_dir
+      file:
+        path: '{{ ansible_tmp_dir }}'
+        state: directory
+
+#    - debug: var=ansible_tmp_dir
+#    - fail:
+        
+    - name: Insert into the /etc/hosts file
+      blockinfile:
+        dest: /etc/hosts
+        block: |
+          127.0.0.1       controller
+        
+    - name: Edit the /etc/apt/sources.list file
+      replace:
+        dest: /etc/apt/sources.list
+        regexp: 'http://(us\.)?(archive|security)\.ubuntu\.com/ubuntu'
+        replace: 'http://ftp.riken.jp/Linux/ubuntu'
+        backup: yes
+        
+    - name: Install ubuntu-cloud-keyring 
+      apt:
+        name: ubuntu-cloud-keyring
+        state: latest
+        update_cache: yes
+
+    - name: Enable the OpenStack repository
+      apt_repository:
+        update_cache: yes
+        repo: 'deb http://ubuntu-cloud.archive.canonical.com/ubuntu xenial-updates/newton main '
+
+    - name: Install all packages
+      apt: name={{item}} state=latest update_cache=yes
+      with_items:
+        - acl
+        - apache2
+        - mariadb-server
+        - python-mysqldb
+        - python-openstackclient
+        - rabbitmq-server
+        - memcached
+        - python-memcache
+        - keystone
+        - libapache2-mod-wsgi
+        - glance
+        - nova-api
+        - nova-conductor
+        - nova-consoleauth
+        - nova-novncproxy
+        - nova-scheduler
+        - nova-compute
+        - neutron-server
+        - neutron-plugin-ml2
+        - neutron-linuxbridge-agent
+        - neutron-l3-agent
+        - neutron-dhcp-agent
+        - neutron-metadata-agent
+
+#        - python-pymysql
+#        - mongodb-server
+#        - mongodb-clients
+#        - python-pymongo
+
+    - name: Disable the keystone service from starting automatically
+      shell: echo "manual" > /etc/init/keystone.override
+      changed_when: False
+         
+    - name: Check that the rand.txt exists
+      stat:
+        path: '{{ ansible_tmp_dir }}/rand.txt'
+      register: result
+                                
+    - name: Generate a random value to use as the administration token
+      command: 'openssl rand -hex 10 -out {{ ansible_tmp_dir }}/rand.txt'
+      when: not result.stat.exists
+      changed_when: False
+
+    - name: read rand.txt
+      command: cat {{ ansible_tmp_dir }}/rand.txt
+      register: admin_token
+      changed_when: False
+
+    - name: Replace the config parameter
+      replace:
+        dest: '{{ item.file }}'
+        regexp: '{{ item.regexp }}'
+        replace: '{{ item.replace }}'
+        backup: yes
+      with_items: '{{ replaces }}'
+      notify: '{{ item.notify }}'
+
+    - name: Insert the config parameter
+      blockinfile:
+        dest: '{{ item.1.dest }}'
+        insertafter: '{{ item.1.insertafter }}'
+        block: |
+          {{ item.1.block }}
+        marker: "# {mark} ANSIBLE MANAGED BLOCK {{item.0}}"          
+        backup: yes
+      with_indexed_items: '{{ blockinfiles }}'
+      notify: '{{ item.1.notify }}'
+
+    - meta: flush_handlers
+
+    - name: Create the database sql file
+      template:
+        src: mysql_db.j2
+        dest: '{{ ansible_tmp_dir }}/mysql_db.sql'
+      register: result
+
+    - name: Import the database
+      mysql_db:
+        state: import
+        name: all
+        login_user: root
+        login_password: '{{ openstack_password }}'
+        target: '{{ ansible_tmp_dir }}/mysql_db.sql'
+      when: result.changed
+
+    - name: Add the openstack user
+      command: 'rabbitmqctl add_user openstack {{ openstack_password }}'
+      register: result
+      changed_when: '"user_already_exists" not in result.stderr'
+      failed_when: 'result.rc and "user_already_exists" not in result.stderr'
+
+    - name: Permit configuration, write, and read access for the openstack user
+      command: rabbitmqctl set_permissions openstack ".*" ".*" ".*"
+      changed_when: False
+
+    - name: Populate the service database
+      command: '{{ item.command }}'
+      register: result
+      changed_when: '"done" in result.stderr' 
+      become_user: '{{ item.become_user }}'
+      with_items: '{{ db_syncs }}'
+
+    - name: Populate the Identity service database
+      command: keystone-manage fernet_setup --keystone-user keystone --keystone-group keystone
+      register: result
+      changed_when: '"already" not in result.stderr'
+
+    - name: Remove the SQLite database file
+      file:
+        path: /var/lib/keystone/keystone.db
+        force: yes
+        state: absent
+        
+    - name: Check that the Identity service exists
+      shell: openstack service list | grep identity
+      register: result
+      failed_when: False
+      changed_when: False
+      environment:
+        OS_TOKEN: '{{ admin_token.stdout }}'
+        OS_URL: http://controller:35357/v3
+        OS_IDENTITY_API_VERSION: 3
+
+    - name: Create the Identity service
+      command: openstack {{ item }}
+      when: result.rc
+      environment:
+        OS_TOKEN: '{{ admin_token.stdout }}'
+        OS_URL: http://controller:35357/v3
+        OS_IDENTITY_API_VERSION: 3
+      with_items: '{{ openstack_commands }}'
+        
+    - name: Create the admin-openrc file and add the following content
+      template:
+        src: admin-openrc.j2
+        dest: '{{ ansible_user_dir }}/admin-openrc'
+
+  handlers:
+    - name: mysql restart
+      service: name=mysql state=restarted        
+    - name: apache2 restart
+      service: name=apache2 state=restarted        
+    - name: glance-registry restart
+      service: name=glance-registry state=restarted        
+    - name: glance-api restart
+      service: name=glance-api state=restarted        
+      

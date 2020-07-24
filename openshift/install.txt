@@ -1,0 +1,14 @@
+
+
+sudo yum update -y
+sudo yum install -y ansible pyOpenSSL python-cryptography python-lxml git epel-release python-devel openssl-devel gcc
+sudo yum install -y python-pip
+
+sudo pip install --upgrade ansible
+
+git clone https://github.com/openshift/openshift-ansible
+git checkout release-3.9
+
+sudo cp /etc/origin/master/admin.kubeconfig /home/openshift/.kube/config
+oc adm policy add-scc-to-group anyuid system:authenticated
+oc adm policy add-scc-to-group hostaccess  system:authenticated

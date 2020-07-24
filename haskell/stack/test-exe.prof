@@ -1,0 +1,41 @@
+	Thu Jan 11 13:32 2018 Time and Allocation Profiling Report  (Final)
+
+	   test-exe +RTS -p -RTS
+
+	total time  =       38.44 secs   (38440 ticks @ 1000 us, 1 processor)
+	total alloc = 68,136,218,072 bytes  (excludes profiling overheads)
+
+COST CENTRE MODULE    SRC                         %time %alloc
+
+rci1.d      Main      app/Main.hs:51:7-156         49.5   72.9
+rcin        Main      app/Main.hs:(68,1)-(70,70)   31.8   24.7
+rci1.d.\    Main      app/Main.hs:51:91-117         8.0    0.0
+rci1.d.\    Main      app/Main.hs:51:28-52          7.5    2.4
+rci1        Main      app/Main.hs:(49,1)-(52,82)    3.1    0.0
+
+
+                                                                                   individual      inherited
+COST CENTRE    MODULE                SRC                        no.     entries  %time %alloc   %time %alloc
+
+MAIN           MAIN                  <built-in>                 144          0    0.0    0.0   100.0  100.0
+ CAF           GHC.Conc.Signal       <entire-module>            252          0    0.0    0.0     0.0    0.0
+ CAF           GHC.Float             <entire-module>            246          0    0.0    0.0     0.0    0.0
+ CAF           GHC.IO.Encoding       <entire-module>            238          0    0.0    0.0     0.0    0.0
+ CAF           GHC.IO.Encoding.Iconv <entire-module>            236          0    0.0    0.0     0.0    0.0
+ CAF           GHC.IO.Handle.FD      <entire-module>            228          0    0.0    0.0     0.0    0.0
+ CAF           GHC.IO.Handle.Text    <entire-module>            226          0    0.0    0.0     0.0    0.0
+ CAF:main1     Main                  <no location info>         286          0    0.0    0.0     0.0    0.0
+  main         Main                  app/Main.hs:72:1-26        288          1    0.0    0.0     0.0    0.0
+ CAF:main2     Main                  <no location info>         285          0    0.0    0.0   100.0  100.0
+  main         Main                  app/Main.hs:72:1-26        290          0    0.0    0.0   100.0  100.0
+   rcin        Main                  app/Main.hs:(68,1)-(70,70) 291     100001   31.8   24.7   100.0  100.0
+    rci1       Main                  app/Main.hs:(49,1)-(52,82) 292     100000    3.1    0.0    68.2   75.3
+     rci1.d    Main                  app/Main.hs:51:7-156       293     100000   49.5   72.9    65.1   75.3
+      rci1.d.\ Main                  app/Main.hs:51:28-52       299  100100000    7.5    2.4     7.5    2.4
+      rci1.d.\ Main                  app/Main.hs:51:150-153     298  100100000    0.0    0.0     0.0    0.0
+      rci1.d.\ Main                  app/Main.hs:51:91-117      297  100000000    8.0    0.0     8.0    0.0
+ CAF:r_r7vW    Main                  app/Main.hs:50:7           284          0    0.0    0.0     0.0    0.0
+  rcin         Main                  app/Main.hs:(68,1)-(70,70) 294          0    0.0    0.0     0.0    0.0
+   rci1        Main                  app/Main.hs:(49,1)-(52,82) 295          0    0.0    0.0     0.0    0.0
+    rci1.r     Main                  app/Main.hs:50:7-15        296          1    0.0    0.0     0.0    0.0
+ main          Main                  app/Main.hs:72:1-26        289          0    0.0    0.0     0.0    0.0

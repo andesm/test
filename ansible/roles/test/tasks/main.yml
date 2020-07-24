@@ -1,0 +1,114 @@
+---
+
+#- local_action: stat path='{{ role_path }}/templates/mariadb.sql.j2'
+#  register: st
+#
+#- debug: msg='{{ st }}'
+#
+#- shell: echo {{ service }}
+#  register: result
+#  when: service is defined
+#
+#- debug: msg='{{ result }}'
+#  
+#- shell: echo {{ item }}
+#  with_items: '{{ alist_that_may_be_undefined | default([])}}'
+#  when: alist_that_may_be_undefined is defined
+
+#- include: roles/test/tasks/with_subelements_test.yml
+
+#- name: gdisk /dev/sdb, /dev/sdc, /dev/sdd
+#  expect:
+#    command: gdisk '{{ item }}'
+#    responses: 
+#        'help\)': w
+#        '\(Y/N\)': y
+#  with_items:
+#    - /dev/sdb
+#    - /dev/sdc
+#    - /dev/sdd
+
+#- name: Create the LVM partition 
+#  expect:
+#    command: gdisk /dev/loop2
+#    timeout: 3
+#    responses:
+#      'Command':
+#        - 'n'
+#        - 'w'
+#      'Partition number': ''
+#      'First sector': ''
+#      'Last sector': ''
+#      'Hex code or GUID': '8e00'
+#      'Do you want to proceed': 'y'
+
+#- name: Adds or removes an SSH authorized key
+#  authorized_key:
+#    user: andesm
+#    key: "{{ lookup('file', '/home2/andesm/.ssh/id_rsa.pub') }}"
+#
+#- name: Synchronization of disk images
+#  synchronize:
+#    src: /home2/andesm/data/dev/ansible/openstack/roles/openstack_jin/files
+#    dest: .
+#    copy_links: yes
+#    compress: no
+#  become: no
+
+#- copy:
+#    src: clouds.yml
+#    dest: .
+    
+#- os_server_facts:
+#    cloud: harumaki
+#    server: jin
+    
+#- debug:
+#    var: openstack_servers.0.addresses.flg.0.addr
+
+#- os_port_facts:
+#    cloud: harumaki
+
+#- debug:
+#    var: openstack_ports
+    
+#- name: Create a new instances
+#  os_server:
+#    cloud: harumaki
+#    state: present
+#    name: '{{ item }}'
+#    image: '{{ item }}'
+#    flavor: '{{ item }}'
+#    timeout: 600
+#    auto_ip: no
+#    nics:
+#      - net-name: flg
+#        port-name: 
+#  with_items:
+#    - jin
+    
+#- name: Assign a new floating IP to the instance 
+#  os_floating_ip:
+#     cloud: harumaki
+#     state: present
+#     server: '{{ item.server }}'
+#     floating_ip_address: '{{ item.address }}'
+#     network: external
+#  with_items:
+#    - server: jin
+#      address: 192.168.1.61
+
+#- vyos_command:
+#    commands:
+#      - show interfaces ethernet eth0
+#    provider: "{{ cli }}"
+
+   
+#- raw: configure
+#  args:
+#    executable: /bin/vbash
+
+- vyos_config:
+    src: vyos.cfg
+    backup: yes
+    provider: "{{ cli }}"

@@ -1,0 +1,58 @@
+	Tue Jan 17 19:29 2017 Time and Allocation Profiling Report  (Final)
+
+	   rci +RTS -p -RTS
+
+	total time  =       15.50 secs   (15503 ticks @ 1000 us, 1 processor)
+	total alloc = 40,905,813,544 bytes  (excludes profiling overheads)
+
+COST CENTRE MODULE  %time %alloc
+
+rci'.d      Main     61.9   77.4
+rcin.r      Main     23.5   20.6
+rci'.d.\    Main     11.1    2.0
+rci'        Main      1.4    0.0
+rcin        Main      1.4    0.0
+
+
+                                                          individual      inherited
+COST CENTRE      MODULE                no.     entries  %time %alloc   %time %alloc
+
+MAIN             MAIN                   55          0    0.0    0.0   100.0  100.0
+ main            Main                  111          0    0.0    0.0     0.0    0.0
+ CAF:main1       Main                  108          0    0.0    0.0     0.0    0.0
+  main           Main                  110          1    0.0    0.0     0.0    0.0
+ CAF:main2       Main                  107          0    0.0    0.0     0.0    0.0
+  main           Main                  112          0    0.0    0.0     0.0    0.0
+ CAF:main_r      Main                  106          0    0.0    0.0   100.0  100.0
+  main           Main                  113          0    0.0    0.0   100.0  100.0
+   main.r        Main                  114          1    0.0    0.0   100.0  100.0
+    rcin         Main                  115     100001    1.4    0.0   100.0  100.0
+     rcin.r      Main                  116     100000   23.5   20.6    98.6  100.0
+      rci'       Main                  117     100000    1.4    0.0    75.1   79.4
+       rci'.d    Main                  118     100000   61.9   77.4    73.7   79.4
+        rci'.d.\ Main                  143   50000000   11.1    2.0    11.1    2.0
+        rci'.d.\ Main                  138   50000000    0.0    0.0     0.0    0.0
+        rSort    Main                  137          0    0.7    0.0     0.7    0.0
+ CAF:f_r7vy      Main                  105          0    0.0    0.0     0.0    0.0
+  rcin           Main                  119          0    0.0    0.0     0.0    0.0
+   rcin.r        Main                  120          0    0.0    0.0     0.0    0.0
+    rci'         Main                  121          0    0.0    0.0     0.0    0.0
+     rci'.d      Main                  122          0    0.0    0.0     0.0    0.0
+      rSort      Main                  123          1    0.0    0.0     0.0    0.0
+ CAF:r_r7vw      Main                  104          0    0.0    0.0     0.0    0.0
+  rcin           Main                  124          0    0.0    0.0     0.0    0.0
+   rcin.r        Main                  125          0    0.0    0.0     0.0    0.0
+    rci'         Main                  126          0    0.0    0.0     0.0    0.0
+     rci'.r      Main                  127          1    0.0    0.0     0.0    0.0
+      rci'.r.\   Main                  144        500    0.0    0.0     0.0    0.0
+ CAF:lvl12_r7vv  Main                  103          0    0.0    0.0     0.0    0.0
+  rcin           Main                  128          0    0.0    0.0     0.0    0.0
+   rcin.r        Main                  129          0    0.0    0.0     0.0    0.0
+    rci'         Main                  130          0    0.0    0.0     0.0    0.0
+     rci'.r      Main                  131          0    0.0    0.0     0.0    0.0
+ CAF             GHC.IO.Handle.FD       98          0    0.0    0.0     0.0    0.0
+ CAF             GHC.IO.Handle.Text     96          0    0.0    0.0     0.0    0.0
+ CAF             GHC.Conc.Signal        93          0    0.0    0.0     0.0    0.0
+ CAF             GHC.IO.Encoding        91          0    0.0    0.0     0.0    0.0
+ CAF             GHC.Float              85          0    0.0    0.0     0.0    0.0
+ CAF             GHC.IO.Encoding.Iconv  74          0    0.0    0.0     0.0    0.0

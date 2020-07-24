@@ -1,0 +1,19 @@
+---
+
+- include_vars: main.yml
+
+- debug: msg='{{ service }}'
+
+- debug: msg='{{ some_list }}'
+
+- shell: echo {{ item.1 }}
+  register: result
+  with_subelements:
+    - '{{ some_list }}'
+    - some_subkey
+  when: some_list.0.some_subkey.0 is not none
+
+- debug: msg='{{ result }}'
+
+- include_vars: roles/test/vars/default.yml
+

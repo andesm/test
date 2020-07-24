@@ -1,0 +1,13 @@
+---
+
+#- shell: 'false'
+#  register: result
+#  failed_when: False
+#  changed_when: False
+#  when: service != 'None'
+#  
+#- debug: msg='{{ result }}'
+#  when: result is defined and result.rc
+
+- include: roles/test/tasks/with_subelements_test.yml
+

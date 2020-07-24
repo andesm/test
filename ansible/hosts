@@ -1,0 +1,7 @@
+[harumaki]
+harumaki ansible_ssh_user=andesm ansible_ssh_pass=harumaki ansible_become_pass=harumaki
+[192.168.1.11]
+192.168.1.11 ansible_ssh_user=vyos ansible_ssh_pass=vyos
+        
+
+

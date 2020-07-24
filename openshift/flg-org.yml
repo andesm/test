@@ -1,0 +1,97 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: mariadb
+  labels:
+    app: mariadb
+spec:
+  containers:
+    - name: mariadb
+      image: mariadb
+      ports:
+        - name: mariadb
+          containerPort: 3309
+      env:
+        - name: MYSQL_ROOT_PASSWORD
+          value: wordpress
+        - name: MYSQL_DATABASE
+          value: wordpress
+      volumeMounts:
+        - name: nfs-share
+          mountPath: /var/lib/mysql
+          subPath: db
+  volumes:
+    - name: nfs-share
+      persistentVolumeClaim:
+        claimName: nfs-pvc
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: service-web
+  labels:
+    app: nginx
+spec:
+  ports:
+  - protocol: TCP
+    port: 80
+    targetPort: 80
+    name: http
+  selector:
+    app: nginx
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: service-wordpress
+  labels:
+    app: wordpress
+spec:
+  ports:
+  - protocol: TCP
+    port: 80
+    targetPort: 80
+    name: http
+  selector:
+    app: wordpress
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: service-mariadb
+  labels:
+    app: mariadb
+spec:
+  ports:
+  - protocol: TCP
+    port: 3306
+    targetPort: 3306
+    name: mariadb
+  selector:
+    app: mariadb
+---
+apiVersion: v1
+kind: Route
+metadata:
+  name: route-flg
+spec:
+  host: openshift.flg.jp
+  path: /flg
+  port:
+    targetPort: http
+  to:
+    kind: Service
+    name: service-web
+---
+apiVersion: v1
+kind: Route
+metadata:
+  name: route-wordpress
+spec:
+  host: openshift.flg.jp
+  path: /
+  port:
+    targetPort: http
+  to:
+    kind: Service
+    name: service-wordpress

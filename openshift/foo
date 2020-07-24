@@ -1,0 +1,170 @@
+apiVersion: v1
+items:
+- apiVersion: v1
+  kind: ImageStream
+  metadata:
+    annotations:
+      openshift.io/generated-by: OpenShiftNewApp
+    creationTimestamp: null
+    labels:
+      app: openshifttest
+    name: wordpress
+  spec:
+    lookupPolicy:
+      local: false
+    tags:
+    - annotations:
+        openshift.io/imported-from: wordpress
+      from:
+        kind: DockerImage
+        name: wordpress
+      generation: null
+      importPolicy: {}
+      name: latest
+      referencePolicy:
+        type: ""
+  status:
+    dockerImageRepository: ""
+- apiVersion: v1
+  kind: ImageStream
+  metadata:
+    annotations:
+      openshift.io/generated-by: OpenShiftNewApp
+    creationTimestamp: null
+    labels:
+      app: openshifttest
+    name: openshifttest
+  spec:
+    lookupPolicy:
+      local: false
+  status:
+    dockerImageRepository: ""
+- apiVersion: v1
+  kind: BuildConfig
+  metadata:
+    annotations:
+      openshift.io/generated-by: OpenShiftNewApp
+    creationTimestamp: null
+    labels:
+      app: openshifttest
+    name: openshifttest
+  spec:
+    nodeSelector: null
+    output:
+      to:
+        kind: ImageStreamTag
+        name: openshifttest:latest
+    postCommit: {}
+    resources: {}
+    source:
+      git:
+        uri: https://github.com/andesm/openshifttest
+      type: Git
+    strategy:
+      dockerStrategy:
+        from:
+          kind: ImageStreamTag
+          name: wordpress:latest
+      type: Docker
+    triggers:
+    - github:
+        secret: CR7OS0Dij7tLn3wnlidz
+      type: GitHub
+    - generic:
+        secret: FEoqonDQM25c1Sx2uZTC
+      type: Generic
+    - type: ConfigChange
+    - imageChange: {}
+      type: ImageChange
+  status:
+    lastVersion: 0
+- apiVersion: v1
+  kind: DeploymentConfig
+  metadata:
+    annotations:
+      openshift.io/generated-by: OpenShiftNewApp
+    creationTimestamp: null
+    labels:
+      app: openshifttest
+    name: openshifttest
+  spec:
+    replicas: 1
+    selector:
+      app: openshifttest
+      deploymentconfig: openshifttest
+    strategy:
+      resources: {}
+    template:
+      metadata:
+        annotations:
+          openshift.io/generated-by: OpenShiftNewApp
+        creationTimestamp: null
+        labels:
+          app: openshifttest
+          deploymentconfig: openshifttest
+      spec:
+        containers:
+        - image: openshifttest:latest
+          name: openshifttest
+          ports:
+          - containerPort: 80
+            protocol: TCP
+          resources: {}
+          env:
+          - name: WORDPRESS_DB_HOST
+            value: mariadb 
+          - name: WORDPRESS_DB_NAME
+            value: wordpress
+          - name: WORDPRESS_DB_PASSWORD
+            value: wordpress
+          volumeMounts:
+          - name: nfs-share
+            mountPath: /var/www/html/
+            subPath: srv/wordpress/flg
+        volumes:
+        - name: nfs-share
+          persistentVolumeClaim:
+          claimName: nfs-pvc
+    test: false
+    triggers:
+    - type: ConfigChange
+    - imageChangeParams:
+        automatic: true
+        containerNames:
+        - openshifttest
+        from:
+          kind: ImageStreamTag
+          name: openshifttest:latest
+      type: ImageChange
+  status:
+    availableReplicas: 0
+    latestVersion: 0
+    observedGeneration: 0
+    replicas: 0
+    unavailableReplicas: 0
+    updatedReplicas: 0
+- apiVersion: v1
+  kind: Service
+  metadata:
+    annotations:
+      openshift.io/generated-by: OpenShiftNewApp
+    creationTimestamp: null
+    labels:
+      app: openshifttest
+    name: openshifttest
+  spec:
+    ports:
+    - name: 80-tcp
+      port: 80
+      protocol: TCP
+      targetPort: 80
+    selector:
+      app: openshifttest
+      deploymentconfig: openshifttest
+  status:
+    loadBalancer: {}
+kind: List
+metadata: {}
+
+
+

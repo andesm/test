@@ -1,0 +1,51 @@
+	Mon Feb 20 14:28 2017 Time and Allocation Profiling Report  (Final)
+
+	   rci2 +RTS -p -RTS
+
+	total time  =       37.47 secs   (37469 ticks @ 1000 us, 1 processor)
+	total alloc = 43,965,862,648 bytes  (excludes profiling overheads)
+
+COST CENTRE  MODULE         %time %alloc
+
+getStdRandom System.Random   82.7   76.0
+rci.d        Main             9.3   22.6
+rci.d.\      Main             4.9    0.0
+rcin         Main             1.9    0.9
+rci.d.\      Main             1.0    0.5
+
+
+                                                         individual      inherited
+COST CENTRE     MODULE                no.     entries  %time %alloc   %time %alloc
+
+MAIN            MAIN                   61          0    0.0    0.0   100.0  100.0
+ main           Main                  123          0    0.0    0.0   100.0  100.0
+  rcin          Main                  126    1000000    1.9    0.9   100.0  100.0
+   rcin.r       Main                  130    1000000    0.2    0.0    15.5   23.1
+    rci         Main                  131    1000000    0.1    0.0    15.3   23.1
+     rci.d      Main                  132    1000000    9.3   22.6    15.2   23.1
+      rci.d.\   Main                  147   13000000    1.0    0.5     1.0    0.5
+      rci.d.\   Main                  142   13000000    0.0    0.0     0.0    0.0
+      rci.d.\   Main                  141   38695727    4.9    0.0     4.9    0.0
+   getStdRandom System.Random         129          0   82.7   76.0    82.7   76.0
+ CAF:main1      Main                  120          0    0.0    0.0     0.0    0.0
+  main          Main                  122          1    0.0    0.0     0.0    0.0
+ CAF:main2      Main                  119          0    0.0    0.0     0.0    0.0
+  main          Main                  124          0    0.0    0.0     0.0    0.0
+   rcin         Main                  125          1    0.0    0.0     0.0    0.0
+ CAF:lvl19_rcjI Main                  118          0    0.0    0.0     0.0    0.0
+  rcin          Main                  127          0    0.0    0.0     0.0    0.0
+   getStdRandom System.Random         128          1    0.0    0.0     0.0    0.0
+ CAF:r_rcjz     Main                  117          0    0.0    0.0     0.0    0.0
+  rcin          Main                  133          0    0.0    0.0     0.0    0.0
+   rcin.r       Main                  134          0    0.0    0.0     0.0    0.0
+    rci         Main                  135          0    0.0    0.0     0.0    0.0
+     rci.r      Main                  136          1    0.0    0.0     0.0    0.0
+ CAF            System.Random         114          0    0.0    0.0     0.0    0.0
+ CAF            Data.Time.Clock.POSIX 112          0    0.0    0.0     0.0    0.0
+ CAF            GHC.IO.Encoding       109          0    0.0    0.0     0.0    0.0
+ CAF            GHC.IO.Handle.FD      107          0    0.0    0.0     0.0    0.0
+ CAF            GHC.IO.Handle.Text    102          0    0.0    0.0     0.0    0.0
+ CAF            GHC.Conc.Signal        96          0    0.0    0.0     0.0    0.0
+ CAF            GHC.Float              95          0    0.0    0.0     0.0    0.0
+ CAF            GHC.IO.Encoding.Iconv  83          0    0.0    0.0     0.0    0.0
+ CAF            GHC.Integer.Type       68          0    0.0    0.0     0.0    0.0

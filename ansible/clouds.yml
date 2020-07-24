@@ -1,0 +1,11 @@
+clouds:
+  harumaki:
+    auth:
+      auth_url: http://harumaki.flg.jp:35357/v3
+      password: openstack
+      project_domain_id: default
+      project_name: admin
+      user_domain_id: default
+      username: admin
+    identity_api_version: '3'
+    image_api_version: '2'

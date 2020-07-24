@@ -1,0 +1,96 @@
+	Mon Feb 20 13:09 2017 Time and Allocation Profiling Report  (Final)
+
+	   rci2 +RTS -p -RTS
+
+	total time  =        8.06 secs   (8062 ticks @ 1000 us, 1 processor)
+	total alloc =     191,960 bytes  (excludes profiling overheads)
+
+COST CENTRE MODULE            %time %alloc
+
+rcin        Main              100.0    0.0
+main        Main                0.0   10.8
+CAF         GHC.Float           0.0   24.0
+CAF         GHC.IO.Encoding     0.0    1.5
+CAF         GHC.IO.Handle.FD    0.0   18.0
+rcin.r      Main                0.0    9.0
+rci'.d      Main                0.0   29.4
+rci'.d.\    Main                0.0    2.5
+rci'.r      Main                0.0    3.8
+
+
+                                                         individual      inherited
+COST CENTRE     MODULE                no.     entries  %time %alloc   %time %alloc
+
+MAIN            MAIN                   64          0    0.0    0.3   100.0  100.0
+ main           Main                  129          0    0.0    5.2     0.0    5.2
+ CAF:main1      Main                  126          0    0.0    0.0     0.0    0.0
+  main          Main                  128          1    0.0    0.0     0.0    0.0
+ CAF:main2      Main                  125          0    0.0    0.0     0.0    5.6
+  main          Main                  130          0    0.0    5.6     0.0    5.6
+ CAF:main_r     Main                  124          0    0.0    0.0   100.0    0.0
+  main          Main                  131          0    0.0    0.0   100.0    0.0
+   main.r       Main                  132          1    0.0    0.0   100.0    0.0
+    rcin        Main                  133  300000001  100.0    0.0   100.0    0.0
+     rcin.r     Main                  134  300000000    0.0    0.0     0.0    0.0
+ CAF:lvl24_rdn0 Main                  123          0    0.0    0.0     0.0    0.0
+  rcin          Main                  135          0    0.0    0.0     0.0    0.0
+   rcin.r       Main                  136          0    0.0    0.0     0.0    0.0
+    rci'        Main                  137          1    0.0    0.0     0.0    0.0
+ CAF:lvl23_rdmZ Main                  122          0    0.0    0.0     0.0    0.0
+  rcin          Main                  138          0    0.0    0.0     0.0    0.0
+   rcin.r       Main                  139          0    0.0    0.0     0.0    0.0
+    rci'        Main                  140          0    0.0    0.0     0.0    0.0
+ CAF:lvl22_rdmY Main                  121          0    0.0    0.0     0.0    0.0
+  rcin          Main                  141          0    0.0    0.0     0.0    0.0
+   rcin.r       Main                  142          0    0.0    0.0     0.0    0.0
+    rci'        Main                  143          0    0.0    0.0     0.0    0.0
+ CAF:lvl21_rdmX Main                  120          0    0.0    0.0     0.0    0.0
+  rcin          Main                  144          0    0.0    0.0     0.0    0.0
+   rcin.r       Main                  145          0    0.0    0.0     0.0    0.0
+    rci'        Main                  146          0    0.0    0.0     0.0    0.0
+ CAF:lvl20_rdmW Main                  119          0    0.0    0.0     0.0    0.0
+  rcin          Main                  147          0    0.0    0.0     0.0    0.0
+   rcin.r       Main                  148          0    0.0    0.0     0.0    0.0
+    rci'        Main                  149          0    0.0    0.0     0.0    0.0
+     rci'.d     Main                  150          1    0.0    0.0     0.0    0.0
+ CAF:lvl19_rdmV Main                  118          0    0.0    0.0     0.0    0.9
+  rcin          Main                  151          0    0.0    0.0     0.0    0.9
+   rcin.r       Main                  152          0    0.0    0.0     0.0    0.9
+    rci'        Main                  153          0    0.0    0.0     0.0    0.9
+     rci'.d     Main                  154          0    0.0    0.9     0.0    0.9
+ CAF:lvl18_rdmU Main                  117          0    0.0    0.0     0.0   17.1
+  rcin          Main                  155          0    0.0    0.0     0.0   17.1
+   rcin.r       Main                  156          0    0.0    0.0     0.0   17.1
+    rci'        Main                  157          0    0.0    0.0     0.0   17.1
+     rci'.d     Main                  158          0    0.0   14.6     0.0   17.1
+      rci'.d.\  Main                  186        101    0.0    2.5     0.0    2.5
+      rci'.d.\  Main                  185        101    0.0    0.0     0.0    0.0
+ CAF:lvl12_rdmO Main                  116          0    0.0    0.0     0.0    5.1
+  rcin          Main                  159          0    0.0    0.0     0.0    5.1
+   rcin.r       Main                  160          0    0.0    0.0     0.0    5.1
+    rci'        Main                  161          0    0.0    0.0     0.0    5.1
+     rci'.d     Main                  162          0    0.0    5.1     0.0    5.1
+ CAF:lvl11_rdmN Main                  115          0    0.0    0.0     0.0    3.8
+  rcin          Main                  163          0    0.0    0.0     0.0    3.8
+   rcin.r       Main                  164          0    0.0    0.0     0.0    3.8
+    rci'        Main                  165          0    0.0    0.0     0.0    3.8
+     rci'.d     Main                  166          0    0.0    3.8     0.0    3.8
+ CAF:lvl3_rdmE  Main                  112          0    0.0    0.0     0.0    5.1
+  rcin          Main                  171          0    0.0    0.0     0.0    5.1
+   rcin.r       Main                  172          0    0.0    0.0     0.0    5.1
+    rci'        Main                  173          0    0.0    0.0     0.0    5.1
+     rci'.d     Main                  174          0    0.0    5.1     0.0    5.1
+ CAF:r_rdmD     Main                  111          0    0.0    0.0     0.0    3.8
+  rcin          Main                  167          0    0.0    0.0     0.0    3.8
+   rcin.r       Main                  168          0    0.0    0.0     0.0    3.8
+    rci'        Main                  169          0    0.0    0.0     0.0    3.8
+     rci'.r     Main                  170          1    0.0    3.8     0.0    3.8
+ CAF:x_rdmB     Main                  110          0    0.0    0.0     0.0    9.0
+  rcin          Main                  175          0    0.0    0.0     0.0    9.0
+   rcin.r       Main                  176          0    0.0    9.0     0.0    9.0
+ CAF            GHC.IO.Handle.FD      107          0    0.0   18.0     0.0   18.0
+ CAF            GHC.IO.Handle.Text    105          0    0.0    0.0     0.0    0.0
+ CAF            GHC.Conc.Signal       103          0    0.0    0.3     0.0    0.3
+ CAF            GHC.IO.Encoding       101          0    0.0    1.5     0.0    1.5
+ CAF            GHC.Float              94          0    0.0   24.0     0.0   24.0
+ CAF            GHC.IO.Encoding.Iconv  83          0    0.0    0.1     0.0    0.1

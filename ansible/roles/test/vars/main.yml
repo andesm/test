@@ -1,0 +1,14 @@
+---
+
+#service: test
+#
+#some_list:
+#  - some_subkey:
+#      - test
+
+
+cli:
+  host: 192.168.1.11
+  username: vyos
+  password: vyos
+  transport: cli
